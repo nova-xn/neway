@@ -922,14 +922,7 @@
             </div>
             <div class="form-group full">
               <label>Какой тематикой РП интересуетесь? *</label>
-              <div class="radio-row">
-                <div class="radio-pill"><input type="radio" name="fRpActor-theme" id="fRpActor-t1" value="Городской" required onchange="checkForm('fRpActor')"><label for="fRpActor-t1">🏙️ Городской</label></div>
-                <div class="radio-pill"><input type="radio" name="fRpActor-theme" id="fRpActor-t2" value="Фэнтези" onchange="checkForm('fRpActor')"><label for="fRpActor-t2">🧝 Фэнтези</label></div>
-                <div class="radio-pill"><input type="radio" name="fRpActor-theme" id="fRpActor-t3" value="Детектив" onchange="checkForm('fRpActor')"><label for="fRpActor-t3">🔍 Детектив</label></div>
-                <div class="radio-pill"><input type="radio" name="fRpActor-theme" id="fRpActor-t4" value="Исторический" onchange="checkForm('fRpActor')"><label for="fRpActor-t4">⚔️ Исторический</label></div>
-                <div class="radio-pill"><input type="radio" name="fRpActor-theme" id="fRpActor-t5" value="Sci-Fi" onchange="checkForm('fRpActor')"><label for="fRpActor-t5">🚀 Sci-Fi</label></div>
-                <div class="radio-pill"><input type="radio" name="fRpActor-theme" id="fRpActor-t6" value="Романтика" onchange="checkForm('fRpActor')"><label for="fRpActor-t6">💙 Романтика</label></div>
-              </div>
+              <input type="text" id="fRpActor-theme" placeholder="Например: фэнтези, детектив, сай-фай..." required onchange="checkForm('fRpActor')">
             </div>
             <div class="form-group full">
               <label>Как вы узнали о проекте? *</label>
@@ -1014,14 +1007,7 @@
             </div>
             <div class="form-group full">
               <label>Какой тематикой РП интересуетесь? *</label>
-              <div class="radio-row">
-                <div class="radio-pill"><input type="radio" name="fRpMember-theme" id="fRpMember-t1" value="Городской" required onchange="checkForm('fRpMember')"><label for="fRpMember-t1">🏙️ Городской</label></div>
-                <div class="radio-pill"><input type="radio" name="fRpMember-theme" id="fRpMember-t2" value="Фэнтези" onchange="checkForm('fRpMember')"><label for="fRpMember-t2">🧝 Фэнтези</label></div>
-                <div class="radio-pill"><input type="radio" name="fRpMember-theme" id="fRpMember-t3" value="Детектив" onchange="checkForm('fRpMember')"><label for="fRpMember-t3">🔍 Детектив</label></div>
-                <div class="radio-pill"><input type="radio" name="fRpMember-theme" id="fRpMember-t4" value="Исторический" onchange="checkForm('fRpMember')"><label for="fRpMember-t4">⚔️ Исторический</label></div>
-                <div class="radio-pill"><input type="radio" name="fRpMember-theme" id="fRpMember-t5" value="Sci-Fi" onchange="checkForm('fRpMember')"><label for="fRpMember-t5">🚀 Sci-Fi</label></div>
-                <div class="radio-pill"><input type="radio" name="fRpMember-theme" id="fRpMember-t6" value="Романтика" onchange="checkForm('fRpMember')"><label for="fRpMember-t6">💙 Романтика</label></div>
-              </div>
+              <input type="text" id="fRpMember-theme" placeholder="Например: фэнтези, детектив, сай-фай..." required onchange="checkForm('fRpMember')">
             </div>
             <div class="form-group full">
               <label>Как вы узнали о проекте? *</label>
@@ -1106,14 +1092,7 @@
             </div>
             <div class="form-group full">
               <label>Тематика, которую хотите развивать *</label>
-              <div class="radio-row">
-                <div class="radio-pill"><input type="radio" name="fRpCreator-theme" id="fRpCreator-t1" value="Городской" required onchange="checkForm('fRpCreator')"><label for="fRpCreator-t1">🏙️ Городской</label></div>
-                <div class="radio-pill"><input type="radio" name="fRpCreator-theme" id="fRpCreator-t2" value="Фэнтези" onchange="checkForm('fRpCreator')"><label for="fRpCreator-t2">🧝 Фэнтези</label></div>
-                <div class="radio-pill"><input type="radio" name="fRpCreator-theme" id="fRpCreator-t3" value="Детектив" onchange="checkForm('fRpCreator')"><label for="fRpCreator-t3">🔍 Детектив</label></div>
-                <div class="radio-pill"><input type="radio" name="fRpCreator-theme" id="fRpCreator-t4" value="Исторический" onchange="checkForm('fRpCreator')"><label for="fRpCreator-t4">⚔️ Исторический</label></div>
-                <div class="radio-pill"><input type="radio" name="fRpCreator-theme" id="fRpCreator-t5" value="Sci-Fi" onchange="checkForm('fRpCreator')"><label for="fRpCreator-t5">🚀 Sci-Fi</label></div>
-                <div class="radio-pill"><input type="radio" name="fRpCreator-theme" id="fRpCreator-t6" value="Авторский" onchange="checkForm('fRpCreator')"><label for="fRpCreator-t6">✨ Авторский</label></div>
-              </div>
+              <input type="text" id="fRpCreator-theme" placeholder="Например: фэнтези, детектив, сай-фай, авторский сеттинг..." required onchange="checkForm('fRpCreator')">
             </div>
             <div class="form-group full">
               <label>Как вы узнали о проекте? *</label>
@@ -1352,20 +1331,23 @@ function checkForm(formId) {
 
   let valid = true;
 
-  // text / email / number / select
-  form.querySelectorAll('input[required], textarea[required], select[required]').forEach(el => {
+  // text / email / number / select (radios handled separately below)
+  form.querySelectorAll('input[required]:not([type="radio"]), textarea[required], select[required]').forEach(el => {
     if (el.type === 'hidden') return;
     if (!el.value || el.value.trim() === '') valid = false;
     if (el.type === 'email' && !/\S+@\S+\.\S+/.test(el.value)) valid = false;
   });
 
-  // radio groups
-  const radioGroups = {};
-  form.querySelectorAll('input[type="radio"][required]').forEach(r => {
-    if (!radioGroups[r.name]) radioGroups[r.name] = false;
-    if (r.checked) radioGroups[r.name] = true;
+  // radio groups — find every group that has at least one required radio,
+  // then check whether ANY radio in that group (not just the one marked
+  // required) is checked. Previously only the first option in each group
+  // could satisfy validation, so picking another option left the button stuck.
+  const requiredGroupNames = new Set();
+  form.querySelectorAll('input[type="radio"][required]').forEach(r => requiredGroupNames.add(r.name));
+  requiredGroupNames.forEach(name => {
+    const isChecked = !!form.querySelector(`input[name="${name}"]:checked`);
+    if (!isChecked) valid = false;
   });
-  Object.values(radioGroups).forEach(v => { if (!v) valid = false; });
 
   btn.classList.toggle('ready', valid);
 }
@@ -1385,11 +1367,11 @@ async function submitForm(formId, licenseType) {
   const age     = document.getElementById(formId + '-age')?.value || '';
   const exp     = document.getElementById(formId + '-exp')?.value || '';
   const goal    = document.getElementById(formId + '-goal')?.value || '';
+  const theme   = document.getElementById(formId + '-theme')?.value || '';
   const time    = document.getElementById(formId + '-time')?.value || '';
 
   const howEl   = document.querySelector(`[name="${formId}-how"]:checked`);
   const rulesEl = document.querySelector(`[name="${formId}-rules"]:checked`);
-  const themeEl = document.querySelector(`[name="${formId}-theme"]:checked`);
 
   const body = {
     licenseType,
@@ -1398,7 +1380,7 @@ async function submitForm(formId, licenseType) {
     age,
     experience: exp,
     goal: goal || '—',
-    theme: themeEl?.value || '—',
+    theme: theme || '—',
     howFound: howEl?.value || '—',
     rules: rulesEl?.value || '—',
     timeAvailable: time,
