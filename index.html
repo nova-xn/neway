@@ -1404,7 +1404,7 @@ async function submitForm(formId, licenseType) {
 async function sendEmail(data) {
   // Using Web3Forms — free, no backend needed
   // Replace YOUR_ACCESS_KEY below with a free key from https://web3forms.com
-  const ACCESS_KEY = '938e676d-7346-4027-8682-6e2ab288c6ee'; // <-- replace this
+  const ACCESS_KEY = 'sf_1b26c435838a1a44b3834b52'; // <-- replace this
 
   const subject = `[Neway RP] Новая заявка — ${data.licenseType}`;
   const message = `
@@ -1428,7 +1428,7 @@ async function sendEmail(data) {
   `.trim();
 
   // If key not set yet — fallback mailto (always works)
-  if (ACCESS_KEY === 'YOUR_WEB3FORMS_KEY') {
+  if (ACCESS_KEY === 'sf_1b26c435838a1a44b3834b52') {
     const mailBody = encodeURIComponent(message);
     window.open(`mailto:ground.ds.project@gmail.com?subject=${encodeURIComponent(subject)}&body=${mailBody}`);
     return true;
