@@ -15,3 +15,5 @@ const SUPABASE_URL = 'https://YOUR-PROJECT-ID.supabase.co';
 const SUPABASE_ANON_KEY = 'YOUR-ANON-PUBLIC-KEY';
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const SUPABASE_URL = 'https://yzlbnxqcvcimalmqivgo.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_G5k3eATjR-4RY0oJNdcVkg_WFfC48vu';
