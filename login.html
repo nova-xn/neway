@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Вход — Neway RP Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="supabase-config.js"></script>
+<style>
+  :root {
+    --bg: #0B1622; --card: #162336; --card2: #1A2B40;
+    --accent: #3B82F6; --accent2: #60A5FA;
+    --text: #E2EAF4; --muted: #7A97B8;
+    --border: rgba(59,130,246,0.15);
+    --red: #F87171; --radius: 16px; --radius-sm: 10px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Inter', sans-serif; font-size: 15px;
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+
+  /* Particles */
+  #particles-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+  .login-wrap {
+    position: relative; z-index: 1;
+    width: 100%; max-width: 420px;
+  }
+
+  .login-logo {
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 1.4rem;
+    color: var(--accent2); margin-bottom: 32px; text-align: center;
+  }
+  .login-logo svg { width: 32px; height: 32px; }
+
+  .login-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 36px 36px 32px;
+  }
+  .login-card h2 {
+    font-family: 'Montserrat', sans-serif; font-size: 1.2rem; font-weight: 800;
+    margin-bottom: 6px;
+  }
+  .login-card .subtitle {
+    font-size: .83rem; color: var(--muted); margin-bottom: 28px;
+  }
+
+  .field { display: flex; flex-direction: column; gap: 7px; margin-bottom: 16px; }
+  .field label {
+    font-size: .76rem; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .05em;
+  }
+  .field input {
+    background: rgba(255,255,255,.04); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 13px 16px;
+    color: var(--text); font-family: 'Inter', sans-serif; font-size: .92rem;
+    outline: none; transition: border-color .2s, box-shadow .2s;
+    width: 100%;
+  }
+  .field input:focus {
+    border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+  }
+
+  .error-box {
+    display: none; background: rgba(248,113,113,.1); border: 1px solid rgba(248,113,113,.3);
+    color: var(--red); border-radius: var(--radius-sm); padding: 11px 14px;
+    font-size: .84rem; margin-bottom: 16px; align-items: center; gap: 8px;
+  }
+  .error-box.show { display: flex; }
+
+  .btn-login {
+    width: 100%; margin-top: 8px; padding: 14px;
+    border-radius: 100px; border: none;
+    background: var(--accent); color: #fff;
+    font-family: 'Inter', sans-serif; font-size: .95rem; font-weight: 700;
+    cursor: pointer; transition: all .2s;
+    box-shadow: 0 0 24px rgba(59,130,246,.3);
+    display: flex; align-items: center; justify-content: center; gap: 9px;
+  }
+  .btn-login:hover { background: var(--accent2); box-shadow: 0 0 36px rgba(96,165,250,.4); }
+  .btn-login:disabled { opacity: .5; pointer-events: none; }
+
+  .back-link {
+    display: block; text-align: center; margin-top: 20px;
+    font-size: .82rem; color: var(--muted); text-decoration: none;
+    transition: color .2s;
+  }
+  .back-link:hover { color: var(--accent2); }
+
+  .admin-note {
+    background: rgba(59,130,246,.06); border: 1px solid rgba(59,130,246,.15);
+    border-radius: var(--radius-sm); padding: 12px 16px;
+    font-size: .8rem; color: var(--muted); margin-bottom: 24px;
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .admin-note svg { flex-shrink: 0; margin-top: 1px; }
+</style>
+</head>
+<body>
+
+<canvas id="particles-canvas"></canvas>
+
+<div class="login-wrap">
+  <div class="login-logo">
+    <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="14" cy="14" r="12" stroke="#60A5FA" stroke-width="2"/>
+      <path d="M8 14 L14 8 L20 14 L14 20 Z" fill="#3B82F6" opacity=".7"/>
+      <circle cx="14" cy="14" r="3" fill="#60A5FA"/>
+    </svg>
+    Neway RP
+  </div>
+
+  <div class="login-card">
+    <h2>Вход в панель</h2>
+    <p class="subtitle">Доступ только для администрации проекта</p>
+
+    <div class="admin-note">
+      <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Это не вход для обычных пользователей. Обычный вход — на <a href="index.html" style="color:var(--accent2);">главной странице</a>.
+    </div>
+
+    <div class="error-box" id="errorBox">
+      <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span id="errorText"></span>
+    </div>
+
+    <div class="field">
+      <label>Email администратора</label>
+      <input type="email" id="emailInput" placeholder="admin@example.com" autocomplete="email">
+    </div>
+    <div class="field">
+      <label>Пароль</label>
+      <input type="password" id="passwordInput" placeholder="••••••••" autocomplete="current-password">
+    </div>
+
+    <button class="btn-login" id="loginBtn" onclick="doLogin()">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+      Войти
+    </button>
+  </div>
+
+  <a href="index.html" class="back-link">← Вернуться на сайт</a>
+</div>
+
+<script>
+// Если уже залогинен — редиректим
+(async () => {
+  const { data } = await supabaseClient.auth.getSession();
+  if (data.session) window.location.href = 'admin.html';
+})();
+
+async function doLogin() {
+  const email    = document.getElementById('emailInput').value.trim();
+  const password = document.getElementById('passwordInput').value;
+  const errorBox = document.getElementById('errorBox');
+  const btn      = document.getElementById('loginBtn');
+
+  errorBox.classList.remove('show');
+
+  if (!email || !password) {
+    document.getElementById('errorText').textContent = 'Заполните все поля';
+    errorBox.classList.add('show'); return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = `<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="animation:spin .7s linear infinite"><path d="M21 12a9 9 0 1 1-2.6-6.4L21 8"/><path d="M21 3v5h-5"/></svg> Вход...`;
+
+  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    document.getElementById('errorText').textContent = 'Неверный email или пароль';
+    errorBox.classList.add('show');
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg> Войти`;
+    return;
+  }
+
+  window.location.href = 'admin.html';
+}
+
+// Enter для сабмита
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+// Particles
+(function() {
+  const canvas = document.getElementById('particles-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+  function resize() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+  for (let i = 0; i < 40; i++) {
+    particles.push({ x: Math.random()*1920, y: Math.random()*1080, vx:(Math.random()-.5)*.3, vy:(Math.random()-.5)*.3, r:Math.random()*1.8+.8 });
+  }
+  function draw() {
+    ctx.clearRect(0,0,W,H);
+    particles.forEach(p => {
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0)p.x=W; if(p.x>W)p.x=0;
+      if(p.y<0)p.y=H; if(p.y>H)p.y=0;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(96,165,250,.45)'; ctx.fill();
+    });
+    particles.forEach((a,i)=>{
+      particles.slice(i+1).forEach(b=>{
+        const d=Math.hypot(a.x-b.x,a.y-b.y);
+        if(d<110){
+          ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
+          ctx.strokeStyle=`rgba(59,130,246,${(.15*(1-d/110)).toFixed(3)})`;
+          ctx.lineWidth=.6; ctx.stroke();
+        }
+      });
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+<style>
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</body>
+</html>
