@@ -1,0 +1,1788 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neway RP — Мир без границ</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+// Конфиг Supabase (дублируем из supabase-config.js для надёжности)
+window.SUPABASE_URL      = 'https://yzlbnxqcvcimalmqivgo.supabase.co';
+window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl6bGJueHFjdmNpbWFsbXFpdmdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1MzE4NTIsImV4cCI6MjA5ODEwNzg1Mn0.pSXSWaSm2GOSJhZzGgF5rR7dlIp-MoeE5E7EJREwu88';
+
+// Клиент для основного сайта — изолирован от админки (разные storageKey)
+window.supabaseClient = window.supabase.createClient(
+  window.SUPABASE_URL,
+  window.SUPABASE_ANON_KEY,
+  {
+    auth: {
+      storageKey: 'neway-site-auth',
+      storage: window.localStorage,
+      autoRefreshToken: true,
+      persistSession: true,
+    }
+  }
+);
+</script>
+<style>
+/* ── DARK THEME (default) ── */
+:root {
+  --bg: #0B1622;
+  --surface: #111E2E;
+  --card: #162336;
+  --card2: #1A2B40;
+  --accent: #3B82F6;
+  --accent2: #60A5FA;
+  --glow: rgba(59,130,246,0.18);
+  --text: #E2EAF4;
+  --muted: #7A97B8;
+  --border: rgba(59,130,246,0.15);
+  --radius: 18px;
+  --radius-sm: 10px;
+  --nav-bg: rgba(11,22,34,0.85);
+  --loader-bg: #0B1622;
+  --particle-color: 96,165,250;
+  --particle-line: 59,130,246;
+  --discord-card-bg: linear-gradient(135deg, #1a2b40 0%, #162336 100%);
+}
+
+/* ── LIGHT THEME ── */
+[data-theme="light"] {
+  --bg: #F0F7F6;
+  --surface: #E2F0EE;
+  --card: #FFFFFF;
+  --card2: #EBF5F3;
+  --accent: #0D9488;
+  --accent2: #2DD4BF;
+  --glow: rgba(13,148,136,0.18);
+  --text: #0F2B28;
+  --muted: #4A7A74;
+  --border: rgba(13,148,136,0.18);
+  --nav-bg: rgba(240,247,246,0.92);
+  --loader-bg: #F0F7F6;
+  --particle-color: 13,148,136;
+  --particle-line: 13,148,136;
+  --discord-card-bg: linear-gradient(135deg, #d0eeea 0%, #e2f5f2 100%);
+}
+
+.lang-btn {
+  height: 36px; padding: 0 12px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted);
+  font-size: 0.78rem; font-weight: 700;
+  letter-spacing: .06em;
+  cursor: pointer;
+  transition: background .2s, color .2s, border-color .2s;
+}
+.lang-btn:hover { border-color: var(--accent); color: var(--accent2); }
+
+.theme-controls { display: flex; align-items: center; gap: 10px; }
+
+.theme-toggle {
+  display: flex; align-items: center;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 4px 6px;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.theme-toggle-btn {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .2s, color .2s;
+  font-size: 14px;
+}
+.theme-toggle-btn.active { background: var(--accent); color: #fff; }
+
+[data-theme="light"] nav { background: var(--nav-bg) !important; box-shadow: 0 1px 12px rgba(13,148,136,0.07); }
+[data-theme="light"] #loader { background: var(--loader-bg); }
+[data-theme="light"] .loader-logo { background: linear-gradient(135deg, #0F2B28, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+[data-theme="light"] .hero h1 { background: linear-gradient(135deg, #0F2B28 0%, var(--accent) 55%, var(--accent2) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+[data-theme="light"] .form-group input, [data-theme="light"] .form-group textarea, [data-theme="light"] .form-group select { background: var(--surface); color: var(--text); }
+[data-theme="light"] .form-group select option { background: var(--card); color: var(--text); }
+[data-theme="light"] .status-input { background: var(--surface); color: var(--text); }
+[data-theme="light"] .msg-btn { color: var(--muted); }
+[data-theme="light"] .btn-ghost { background: rgba(0,0,0,.05); color: var(--text); }
+[data-theme="light"] .discord-card { background: var(--discord-card-bg); }
+[data-theme="light"] .radio-pill label { background: var(--surface); color: var(--muted); }
+[data-theme="light"] .acc-trigger { color: var(--text); }
+[data-theme="light"] .badge.new { background: rgba(234,179,8,.12); color: #B45309; }
+[data-theme="light"] .badge.review { background: rgba(99,102,241,.12); color: #4338CA; }
+[data-theme="light"] .badge.approved{ background: rgba(34,197,94,.12); color: #15803D; }
+[data-theme="light"] .badge.rejected{ background: rgba(239,68,68,.12); color: #B91C1C; }
+[data-theme="light"] .status-item { background: var(--surface); }
+[data-theme="light"] .status-none { background: var(--surface); }
+[data-theme="light"] .form-progress { background: rgba(13,148,136,.06); }
+[data-theme="light"] .form-progress-track { background: rgba(0,0,0,.07); }
+[data-theme="light"] #particles-canvas { opacity: 0.5; }
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+.icon-inline { width: 1em; height: 1em; display: inline-block; vertical-align: -0.125em; flex-shrink: 0; }
+.feat-icon .icon-inline { width: 18px; height: 18px; }
+.form-icon .icon-inline { width: 24px; height: 24px; }
+.success-icon .icon-inline { width: 44px; height: 44px; }
+.contact-icon .icon-inline { width: 22px; height: 22px; }
+.tab-icon .icon-inline { width: 15px; height: 15px; }
+
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.65; overflow-x: hidden; }
+
+#particles-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+.wrapper { position: relative; z-index: 1; }
+.container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+/* ── NAV — sidebar по-настоящему центрирован через grid ── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--nav-bg);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+}
+
+.nav-logo {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800; font-size: 1.25rem;
+  color: var(--accent2);
+  letter-spacing: 0.04em;
+  display: flex; align-items: center; gap: 10px;
+  flex-shrink: 0;
+  justify-self: start;
+}
+.nav-logo svg { width: 28px; height: 28px; }
+
+/* FIX: nav-links — центральная колонка grid, всегда по центру независимо от ширины соседних блоков */
+.nav-links {
+  display: flex; gap: 28px;
+  justify-self: center;
+  grid-column: 2;
+}
+.nav-links a {
+  color: var(--muted); text-decoration: none;
+  font-size: 0.88rem; font-weight: 500;
+  transition: color .25s;
+  white-space: nowrap;
+}
+.nav-links a:hover { color: var(--accent2); }
+
+.nav-right-group { display: flex; align-items: center; gap: 12px; flex-shrink: 0; justify-self: end; }
+
+/* ── HERO ── */
+.hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 120px 24px 80px; }
+.hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(59,130,246,0.12); border: 1px solid var(--border); border-radius: 100px; padding: 6px 18px; font-size: 0.78rem; font-weight: 600; color: var(--accent2); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 32px; animation: fadeDown .7s ease both; }
+.hero-badge::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent2); animation: pulse 1.8s infinite; flex-shrink: 0; }
+.hero h1 { font-family: 'Montserrat', sans-serif; font-size: clamp(2.8rem, 7vw, 5.2rem); font-weight: 800; line-height: 1.08; letter-spacing: -0.02em; background: linear-gradient(135deg, var(--text) 0%, var(--accent2) 55%, var(--accent2) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: fadeDown .7s .15s ease both; margin-bottom: 12px; }
+.hero-sub { font-size: 1.15rem; color: var(--muted); max-width: 560px; animation: fadeDown .7s .28s ease both; margin-bottom: 48px; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; animation: fadeDown .7s .4s ease both; }
+.btn { display: inline-flex; align-items: center; gap: 9px; padding: 13px 28px; border-radius: 100px; font-size: 0.9rem; font-weight: 600; cursor: pointer; text-decoration: none; border: none; transition: transform .2s, box-shadow .2s, background .2s; }
+.btn:active { transform: scale(.97); }
+.btn-primary { background: var(--accent); color: #fff; box-shadow: 0 0 24px rgba(59,130,246,.35); }
+.btn-primary:hover { background: var(--accent2); box-shadow: 0 0 36px rgba(96,165,250,.45); }
+.btn-ghost { background: rgba(255,255,255,.06); color: var(--text); border: 1px solid var(--border); }
+.btn-ghost:hover { background: rgba(255,255,255,.1); }
+
+section { padding: 96px 0; }
+.section-eyebrow { font-size: 0.75rem; font-weight: 700; color: var(--accent2); letter-spacing: .14em; text-transform: uppercase; margin-bottom: 12px; }
+.section-title { font-family: 'Montserrat', sans-serif; font-size: clamp(1.6rem, 3.5vw, 2.5rem); font-weight: 800; line-height: 1.15; margin-bottom: 16px; }
+.section-desc { color: var(--muted); max-width: 520px; }
+.section-header { margin-bottom: 56px; }
+
+.about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: center; }
+.about-text p { color: var(--muted); margin-bottom: 16px; }
+.feature-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+.feature-list li { display: flex; gap: 14px; align-items: flex-start; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; transition: border-color .25s, transform .25s; }
+.feature-list li:hover { border-color: rgba(59,130,246,.4); transform: translateX(4px); }
+.feat-icon { flex-shrink: 0; width: 38px; height: 38px; border-radius: 10px; background: rgba(59,130,246,.12); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+.feat-body strong { display: block; font-size: 0.95rem; margin-bottom: 3px; }
+.feat-body span { font-size: 0.83rem; color: var(--muted); }
+
+.tabs-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 36px; }
+.tab-btn { display: flex; align-items: center; gap: 9px; padding: 11px 22px; border-radius: 100px; border: 1px solid var(--border); background: var(--card); color: var(--muted); font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: all .25s; }
+.tab-btn .tab-icon { font-size: 1rem; }
+.tab-btn.active, .tab-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 0 18px rgba(59,130,246,.3); }
+
+.form-panel { display: none; animation: slideUp .4s ease both; }
+.form-panel.open { display: block; }
+.form-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 36px 40px 40px; }
+.form-card-header { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+.form-icon { width: 50px; height: 50px; border-radius: 14px; background: rgba(59,130,246,.15); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
+.form-card-header h3 { font-family: 'Montserrat', sans-serif; font-size: 1.2rem; font-weight: 700; }
+.form-card-header p { font-size: 0.83rem; color: var(--muted); margin-top: 2px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.form-group { display: flex; flex-direction: column; gap: 7px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-group label { font-size: 0.82rem; font-weight: 600; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+.nick-label { margin-top: 4px; }
+.form-group input, .form-group textarea, .form-group select { background: rgba(255,255,255,.04); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 16px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 0.9rem; outline: none; transition: border-color .2s, box-shadow .2s; }
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,130,246,.12); }
+.form-group textarea { resize: vertical; min-height: 90px; }
+.form-group select option { background: var(--card2); }
+
+.messenger-toggle { display: flex; gap: 8px; margin-bottom: 8px; }
+.msg-btn { flex: 1; padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: transparent; color: var(--muted); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all .2s; display: flex; align-items: center; justify-content: center; gap: 7px; }
+.msg-btn.selected { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.radio-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.radio-pill input { display: none; }
+.radio-pill label { display: flex; align-items: center; gap: 6px; padding: 9px 18px; border-radius: 100px; border: 1px solid var(--border); background: rgba(255,255,255,.03); color: var(--muted); font-size: 0.84rem; font-weight: 500; cursor: pointer; transition: all .2s; text-transform: none; letter-spacing: 0; }
+.radio-pill input:checked + label { background: rgba(59,130,246,.14); border-color: var(--accent); color: var(--accent2); }
+
+/* FIX: кнопка отправки заявки — в неактивном состоянии явно остаётся кнопкой
+   (контур + приглушённый фон), а не превращается в едва видимый текст */
+.submit-area {
+  margin-top: 28px;
+  display: flex; align-items: center; gap: 14px; justify-content: flex-end;
+  flex-wrap: wrap;
+}
+.submit-note { font-size: 0.78rem; color: var(--muted); }
+.btn-submit {
+  padding: 13px 34px;
+  border-radius: 100px;
+  border: 1.5px solid var(--border);
+  background: rgba(255,255,255,.04);
+  color: var(--muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.92rem; font-weight: 700;
+  cursor: not-allowed;
+  box-shadow: none;
+  transition: all .25s;
+  display: inline-flex; align-items: center; gap: 9px;
+  pointer-events: none;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.btn-submit.ready {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 0 24px rgba(59,130,246,.3);
+  pointer-events: all;
+}
+.btn-submit.ready:hover { background: var(--accent2); border-color: var(--accent2); box-shadow: 0 0 36px rgba(96,165,250,.4); transform: translateY(-1px); }
+
+.success-banner { display: none; background: rgba(34,197,94,.1); border: 1px solid rgba(34,197,94,.25); border-radius: var(--radius); padding: 28px 32px; text-align: center; animation: fadeDown .4s ease both; }
+.success-banner.show { display: block; }
+.success-banner .success-icon { font-size: 2.8rem; margin-bottom: 12px; }
+.success-banner h4 { font-size: 1.1rem; font-weight: 700; color: #4ADE80; margin-bottom: 8px; }
+.success-banner p { color: var(--muted); font-size: 0.9rem; }
+
+.discord-section { padding: 80px 0; }
+.discord-card { background: var(--discord-card-bg); border: 1px solid var(--border); border-radius: 24px; padding: 56px 48px; display: flex; align-items: center; justify-content: space-between; gap: 32px; flex-wrap: wrap; position: relative; overflow: hidden; }
+.discord-card::before { content: ''; position: absolute; top: -60px; right: -60px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(88,101,242,.25) 0%, transparent 70%); pointer-events: none; }
+.discord-card-text h2 { font-family: 'Montserrat', sans-serif; font-size: 1.9rem; font-weight: 800; margin-bottom: 10px; }
+.discord-card-text p { color: var(--muted); max-width: 420px; }
+.btn-discord { display: inline-flex; align-items: center; gap: 12px; padding: 15px 32px; border-radius: 100px; background: #5865F2; color: #fff; font-size: 1rem; font-weight: 700; text-decoration: none; box-shadow: 0 0 28px rgba(88,101,242,.4); transition: all .25s; white-space: nowrap; }
+.btn-discord:hover { background: #4752C4; transform: translateY(-2px); box-shadow: 0 0 40px rgba(88,101,242,.5); }
+.btn-discord svg { width: 22px; height: 22px; }
+
+.contacts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.contact-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 22px; display: flex; align-items: center; gap: 16px; transition: border-color .25s, transform .25s; text-decoration: none; color: inherit; }
+.contact-card:hover { border-color: rgba(59,130,246,.4); transform: translateY(-3px); }
+.contact-icon { width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
+.contact-icon.tg { background: rgba(39,171,234,.15); }
+.contact-icon.ds { background: rgba(88,101,242,.15); }
+.contact-icon.gm { background: rgba(234,67,53,.15); }
+.contact-body strong { display: block; font-size: 0.95rem; }
+.contact-body span { font-size: 0.82rem; color: var(--muted); }
+
+footer { border-top: 1px solid var(--border); padding: 36px 24px; text-align: center; color: var(--muted); font-size: 0.82rem; }
+footer a { color: var(--accent2); text-decoration: none; }
+
+.divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); margin: 0 auto; }
+
+.reveal { opacity: 0; transform: translateY(30px); transition: opacity .6s ease, transform .6s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+
+@keyframes fadeDown { from { opacity: 0; transform: translateY(-18px); } to { opacity: 1; transform: none; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+
+@media (max-width: 768px) {
+  .about-grid { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+  .form-grid .form-group.full { grid-column: 1; }
+  .contacts-grid { grid-template-columns: 1fr; }
+  .discord-card { flex-direction: column; text-align: center; }
+  nav { grid-template-columns: 1fr; justify-items: center; gap: 12px; }
+  .nav-logo, .nav-right-group { justify-self: center; }
+  .nav-links { grid-column: 1; justify-self: center; flex-wrap: wrap; justify-content: center; }
+  .form-card { padding: 24px 20px; }
+}
+
+.form-progress { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding: 14px 18px; background: rgba(59,130,246,.06); border: 1px solid rgba(59,130,246,.12); border-radius: var(--radius-sm); }
+.form-progress-track { flex: 1; height: 5px; background: rgba(255,255,255,.07); border-radius: 10px; overflow: hidden; }
+.form-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 10px; transition: width .35s ease; }
+.form-progress-label { font-size: 0.78rem; font-weight: 600; color: var(--muted); white-space: nowrap; min-width: 70px; text-align: right; }
+.form-progress-label.done { color: var(--accent2); }
+
+.status-check-section { padding: 80px 0 0; }
+.status-check-card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 48px 48px; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+.status-check-card h2 { font-family: 'Montserrat', sans-serif; font-size: 1.7rem; font-weight: 800; line-height: 1.2; margin-bottom: 10px; }
+.status-check-card p { color: var(--muted); font-size: 0.9rem; }
+.status-input-row { display: flex; gap: 10px; }
+.status-input { flex: 1; background: rgba(255,255,255,.05); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 13px 16px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 0.9rem; outline: none; transition: border-color .2s, box-shadow .2s; }
+.status-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,130,246,.12); }
+.btn-status-check { padding: 13px 22px; border-radius: var(--radius-sm); border: none; background: var(--accent); color: #fff; font-size: 0.88rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: background .2s, box-shadow .2s; }
+.btn-status-check:hover { background: var(--accent2); box-shadow: 0 0 20px rgba(96,165,250,.35); }
+.btn-status-check:disabled { opacity: .5; pointer-events: none; }
+.status-results { margin-top: 16px; display: none; }
+.status-results.show { display: block; }
+.status-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 8px; gap: 12px; }
+.status-item-left { display: flex; flex-direction: column; gap: 2px; }
+.status-item-type { font-size: 0.88rem; font-weight: 600; }
+.status-item-date { font-size: 0.76rem; color: var(--muted); }
+.status-none { text-align: center; padding: 20px; color: var(--muted); font-size: 0.88rem; background: rgba(255,255,255,.02); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+
+/* ── RULES — tabs & grid ── */
+.rules-section { padding: 80px 0 0; }
+
+/* Tab sub-nav inside rules */
+.rules-tabs-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 32px; }
+.rules-tab-btn { display: flex; align-items: center; gap: 9px; padding: 11px 22px; border-radius: 100px; border: 1px solid var(--border); background: var(--card); color: var(--muted); font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: all .25s; }
+.rules-tab-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 0 18px rgba(59,130,246,.3); }
+.rules-tab-btn:hover:not(.active) { border-color: var(--accent); color: var(--accent2); }
+
+.rules-panel { display: none; }
+.rules-panel.open { display: block; animation: slideUp .4s ease both; }
+
+.rules-category-header { display: flex; align-items: center; margin-bottom: 20px; }
+.rules-cat-label { display: inline-flex; align-items: center; gap: 8px; font-size: 0.82rem; font-weight: 700; color: #5865F2; text-transform: uppercase; letter-spacing: .1em; background: rgba(88,101,242,.1); border: 1px solid rgba(88,101,242,.2); border-radius: 100px; padding: 6px 16px; }
+.rules-cat-label.rp { color: var(--accent2); background: rgba(59,130,246,.1); border-color: rgba(59,130,246,.25); }
+
+.rules-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; margin-bottom: 12px; }
+.rule-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 18px 20px; display: flex; gap: 14px; align-items: flex-start; transition: border-color .25s, transform .25s; }
+.rule-card:hover { border-color: rgba(59,130,246,.35); transform: translateY(-2px); }
+.rule-card-rp { border-left: 3px solid var(--accent); }
+.rule-card-ds { border-left: 3px solid #5865F2; }
+.rule-num { flex-shrink: 0; min-width: 30px; height: 30px; border-radius: 8px; background: rgba(59,130,246,.12); color: var(--accent2); font-size: 0.72rem; font-weight: 800; display: flex; align-items: center; justify-content: center; letter-spacing: .02em; }
+.rule-num-ds { background: rgba(88,101,242,.15); color: #818CF8; }
+.rp-num { background: rgba(59,130,246,.18); font-size: 0.65rem; }
+.rule-title { display: block; font-size: 0.9rem; font-weight: 700; margin-bottom: 4px; color: var(--text); }
+.rule-body { display: flex; flex-direction: column; gap: 6px; }
+.rule-text { font-size: 0.83rem; color: var(--muted); line-height: 1.6; margin: 0; }
+.rule-text a { color: var(--accent2); text-decoration: none; }
+.rule-text a:hover { text-decoration: underline; }
+.rule-penalty { display: inline-block; font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: 100px; letter-spacing: .04em; width: fit-content; margin-top: 4px; }
+.rule-penalty.mute { background: rgba(234,179,8,.15); color: #CA8A04; border: 1px solid rgba(234,179,8,.25); }
+.rule-penalty.mute-long { background: rgba(249,115,22,.15); color: #C2410C; border: 1px solid rgba(249,115,22,.25); }
+.rule-penalty.ban-temp { background: rgba(99,102,241,.15); color: #6366F1; border: 1px solid rgba(99,102,241,.25); }
+.rule-penalty.ban { background: rgba(239,68,68,.15); color: #DC2626; border: 1px solid rgba(239,68,68,.25); }
+.rule-penalty.ban-appeal { background: rgba(139,0,0,.18); color: #991B1B; border: 1px solid rgba(239,68,68,.3); }
+
+.accordion { display: flex; flex-direction: column; gap: 8px; }
+.acc-item { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; transition: border-color .25s; }
+.acc-item.open { border-color: rgba(59,130,246,.35); }
+.acc-trigger { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 22px; background: none; border: none; cursor: pointer; color: var(--text); text-align: left; font-family: 'Inter', sans-serif; }
+.acc-trigger-left { display: flex; align-items: center; gap: 14px; }
+.acc-num { flex-shrink: 0; width: 28px; height: 28px; border-radius: 8px; background: rgba(59,130,246,.12); color: var(--accent2); font-size: 0.75rem; font-weight: 800; display: flex; align-items: center; justify-content: center; letter-spacing: .03em; }
+.acc-title { font-size: 0.95rem; font-weight: 600; }
+.acc-arrow { flex-shrink: 0; width: 18px; height: 18px; color: var(--muted); transition: transform .25s; }
+.acc-item.open .acc-arrow { transform: rotate(180deg); color: var(--accent2); }
+.acc-body { max-height: 0; overflow: hidden; transition: max-height .35s ease, padding .25s; padding: 0 22px; }
+.acc-item.open .acc-body { max-height: 600px; padding: 0 22px 18px; }
+.acc-body p { color: var(--muted); font-size: 0.88rem; line-height: 1.7; margin-bottom: 8px; }
+.acc-body p:last-child { margin-bottom: 0; }
+.acc-body ul { color: var(--muted); font-size: 0.88rem; line-height: 1.7; padding-left: 18px; }
+.acc-body li { margin-bottom: 4px; }
+
+.nav-status { display: flex; align-items: center; gap: 7px; font-size: 0.78rem; color: var(--muted); font-weight: 500; }
+.nav-status-dot { width: 7px; height: 7px; border-radius: 50%; background: #4ADE80; box-shadow: 0 0 6px rgba(74,222,128,.6); animation: pulse-green 2s infinite; }
+@keyframes pulse-green { 0%, 100% { opacity: 1; box-shadow: 0 0 6px rgba(74,222,128,.6); } 50% { opacity: .6; box-shadow: 0 0 12px rgba(74,222,128,.9); } }
+
+@media (max-width: 768px) { .status-check-card { grid-template-columns: 1fr; padding: 28px 24px; } }
+
+#loader { position: fixed; inset: 0; z-index: 9999; background: var(--loader-bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; transition: opacity .5s, visibility .5s; }
+#loader.gone { opacity: 0; visibility: hidden; }
+.loader-logo { font-family: 'Montserrat', sans-serif; font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, var(--text), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.loader-bar-wrap { width: 200px; height: 3px; background: rgba(255,255,255,.08); border-radius: 10px; overflow: hidden; }
+.loader-bar { height: 100%; width: 0; background: var(--accent); border-radius: 10px; animation: fill 1.2s ease forwards; }
+@keyframes fill { to { width: 100%; } }
+
+@media (max-width: 768px) { .rules-grid { grid-template-columns: 1fr; } }
+
+/* ══ AUTH STYLES ══ */
+.auth-overlay { display:none; position:fixed; inset:0; z-index:9000; background:rgba(0,0,0,.7); backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:24px; }
+.auth-overlay.open { display:flex; animation:fadeInA .2s ease; }
+@keyframes fadeInA { from{opacity:0} to{opacity:1} }
+.auth-modal { width:100%; max-width:420px; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:36px 32px 32px; position:relative; animation:slideUpA .3s ease; }
+@keyframes slideUpA { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
+.auth-modal-close { position:absolute; top:16px; right:16px; width:32px; height:32px; border-radius:50%; border:1px solid var(--border); background:transparent; color:var(--muted); font-size:1rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s; }
+.auth-modal-close:hover { background:rgba(255,255,255,.08); color:var(--text); }
+.auth-modal-close.locked { pointer-events:none; opacity:.3; }
+.auth-modal-logo { display:flex; align-items:center; gap:10px; font-family:'Montserrat',sans-serif; font-weight:800; font-size:1.1rem; color:var(--accent2); margin-bottom:4px; }
+.auth-modal-logo svg { width:24px; height:24px; }
+.auth-modal-sub { color:var(--muted); font-size:0.83rem; margin-bottom:24px; }
+.auth-tabs { display:flex; gap:0; margin-bottom:22px; background:rgba(255,255,255,.04); border-radius:var(--radius-sm); padding:4px; }
+.auth-tab { flex:1; padding:9px; border-radius:8px; border:none; background:transparent; color:var(--muted); font-size:0.85rem; font-weight:600; cursor:pointer; transition:all .2s; font-family:'Inter',sans-serif; }
+.auth-tab.active { background:var(--accent); color:#fff; }
+.auth-field { display:flex; flex-direction:column; gap:7px; margin-bottom:14px; }
+.auth-field label { font-size:0.79rem; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+.auth-field input { background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:var(--radius-sm); padding:11px 14px; color:var(--text); font-family:'Inter',sans-serif; font-size:0.9rem; outline:none; transition:border-color .2s,box-shadow .2s; width:100%; }
+.auth-field input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(59,130,246,.12); }
+.auth-ms-row { display:flex; gap:8px; margin-bottom:8px; }
+.auth-ms-btn { flex:1; padding:9px 10px; border-radius:var(--radius-sm); border:1px solid var(--border); background:transparent; color:var(--muted); font-size:0.82rem; font-weight:600; cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center; gap:6px; font-family:'Inter',sans-serif; }
+.auth-ms-btn.sel { background:var(--accent); border-color:var(--accent); color:#fff; }
+.auth-submit { width:100%; margin-top:8px; padding:12px; border-radius:100px; border:none; background:var(--accent); color:#fff; font-size:0.9rem; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 0 22px rgba(59,130,246,.3); transition:all .25s; font-family:'Inter',sans-serif; }
+.auth-submit:hover { background:var(--accent2); }
+.auth-submit:disabled { opacity:.45; pointer-events:none; }
+.auth-error { display:none; margin-bottom:14px; background:rgba(239,68,68,.1); border:1px solid rgba(239,68,68,.3); color:#FCA5A5; border-radius:var(--radius-sm); padding:10px 14px; font-size:0.83rem; }
+.auth-error.show { display:block; }
+.token-screen { text-align:center; }
+.token-icon { font-size:2.6rem; margin-bottom:12px; }
+.token-screen h3 { font-family:'Montserrat',sans-serif; font-size:1.15rem; font-weight:800; margin-bottom:8px; color:#4ADE80; }
+.token-screen > p { color:var(--muted); font-size:0.85rem; margin-bottom:20px; }
+.token-box { background:rgba(59,130,246,.08); border:1px solid rgba(59,130,246,.3); border-radius:var(--radius-sm); padding:18px; font-family:'Montserrat',monospace; font-size:1.5rem; font-weight:800; color:var(--accent2); letter-spacing:.15em; margin-bottom:10px; user-select:all; cursor:pointer; transition:border-color .2s; }
+.token-box:hover { border-color:var(--accent); }
+.token-copy-hint { font-size:0.75rem; color:var(--muted); margin-bottom:16px; }
+.token-warn { background:rgba(251,191,36,.08); border:1px solid rgba(251,191,36,.25); border-radius:var(--radius-sm); padding:12px 14px; font-size:0.82rem; color:#FCD34D; margin-bottom:20px; display:flex; align-items:flex-start; gap:8px; text-align:left; }
+.token-close-btn { width:100%; padding:12px; border-radius:100px; border:none; background:var(--accent); color:#fff; font-size:0.9rem; font-weight:700; cursor:pointer; transition:all .25s; font-family:'Inter',sans-serif; }
+.token-close-btn:disabled { opacity:.4; pointer-events:none; }
+.token-close-btn.ready:hover { background:var(--accent2); }
+.token-countdown { font-size:0.8rem; color:var(--muted); text-align:center; margin-top:10px; }
+.nav-auth-btn { display:flex; align-items:center; gap:8px; padding:8px 16px; border-radius:100px; border:1px solid var(--border); background:transparent; color:var(--muted); font-size:0.82rem; font-weight:600; cursor:pointer; transition:all .2s; white-space:nowrap; font-family:'Inter',sans-serif; }
+.nav-auth-btn:hover { border-color:var(--accent); color:var(--accent2); }
+.nav-auth-btn.logged { background:rgba(59,130,246,.1); border-color:rgba(59,130,246,.3); color:var(--accent2); cursor:default; }
+.nav-user-row { display:flex; align-items:center; gap:8px; }
+.nav-logout-btn { display:flex; align-items:center; gap:5px; padding:7px 13px; border-radius:100px; border:1px solid var(--border); background:transparent; color:var(--muted); font-size:0.78rem; font-weight:600; cursor:pointer; transition:all .2s; font-family:'Inter',sans-serif; }
+.nav-logout-btn:hover { border-color:rgba(248,113,113,.4); color:#F87171; }
+.auth-gate { display:none; background:rgba(59,130,246,.05); border:1px dashed rgba(59,130,246,.3); border-radius:var(--radius); padding:40px 32px; text-align:center; }
+.auth-gate.show { display:block; animation:slideUpA .3s ease; }
+.auth-gate h4 { font-size:1rem; font-weight:700; margin-bottom:8px; }
+.auth-gate p { color:var(--muted); font-size:0.85rem; margin-bottom:20px; }
+.auth-gate-btn { display:inline-flex; align-items:center; gap:8px; padding:11px 26px; border-radius:100px; border:none; background:var(--accent); color:#fff; font-size:0.88rem; font-weight:700; cursor:pointer; transition:all .25s; box-shadow:0 0 20px rgba(59,130,246,.25); font-family:'Inter',sans-serif; }
+.auth-gate-btn:hover { background:var(--accent2); }
+[data-theme="light"] .auth-field input { background:var(--surface); color:var(--text); }
+[data-theme="light"] .auth-tabs { background:rgba(0,0,0,.04); }
+[data-theme="light"] .auth-ms-btn { color:var(--muted); }
+</style>
+</head>
+<body>
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-logo">Neway RP</div>
+  <div class="loader-bar-wrap"><div class="loader-bar"></div></div>
+</div>
+
+<!-- PARTICLES -->
+<canvas id="particles-canvas"></canvas>
+
+<div class="wrapper">
+
+<!-- NAV — sidebar centered -->
+<nav>
+  <div class="nav-logo">
+    <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="14" cy="14" r="12" stroke="#60A5FA" stroke-width="2"/>
+      <path d="M8 14 L14 8 L20 14 L14 20 Z" fill="#3B82F6" opacity=".7"/>
+      <circle cx="14" cy="14" r="3" fill="#60A5FA"/>
+    </svg>
+    Neway RP
+  </div>
+
+  <div class="nav-links">
+    <a href="#about">О проекте</a>
+    <a href="#rules">Правила</a>
+    <a href="#personnel">Персонал</a>
+    <a href="#rplicenses">РП лицензии</a>
+    <a href="#contacts">Контакты</a>
+  </div>
+
+  <div class="nav-right-group">
+    <div class="theme-toggle" onclick="toggleTheme()" title="Переключить тему">
+      <button class="theme-toggle-btn active" id="btnDark">🌙</button>
+      <button class="theme-toggle-btn" id="btnLight">☀️</button>
+    </div>
+    <div class="nav-status">
+      <span class="nav-status-dot"></span>
+      <span>Проект активен</span>
+    </div>
+    <div id="nav-auth-area"></div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">Roleplay Project — 2026</div>
+  <h1>Neway RP</h1>
+  <p class="hero-sub">Погрузись в живой ролевой мир без границ. Создавай истории, получай лицензии, становись частью сообщества.</p>
+  <div class="hero-actions">
+    <a href="#personnel" class="btn btn-primary">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      Подать заявку
+    </a>
+    <a href="https://discord.gg/nXKBABjTN6" target="_blank" class="btn btn-ghost">
+      <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.099 18.08.11 18.102.128 18.116a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.027c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+      Discord сервер
+    </a>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="container">
+    <div class="about-grid reveal">
+      <div class="about-text">
+        <p class="section-eyebrow">О проекте</p>
+        <h2 class="section-title">Что такое<br>Neway RP?</h2>
+        <p>Neway RP — это живой ролевой проект, где каждый может стать актёром своей истории. Мы объединяем людей разных интересов в едином пространстве для творческого ролевого взаимодействия.</p>
+        <p>Проект охватывает все РП-тематики: от современных городских историй до фэнтезийных миров и детективных сюжетов. Все РП-сессии проводятся на нашем Discord-сервере — там живёт настоящее сообщество.</p>
+      </div>
+      <ul class="feature-list">
+        <li>
+          <div class="feat-icon"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+          <div class="feat-body"><strong>Мультижанровый мир</strong><span>Город, фэнтези, детектив, исторический и любой другой сеттинг</span></div>
+        </li>
+        <li>
+          <div class="feat-icon"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M4 21c0-4 2-6 5-7"/><path d="M15 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M20 21c0-4-2-6-5-7"/></svg></div>
+          <div class="feat-body"><strong>Глубокий отыгрыш</strong><span>Система лицензий обеспечивает качество и честность в РП</span></div>
+        </li>
+        <li>
+          <div class="feat-icon"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3v2h6V3"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="13" y2="18"/></svg></div>
+          <div class="feat-body"><strong>Прозрачные правила</strong><span>Понятные базовые правила, которые защищают всех участников</span></div>
+        </li>
+        <li>
+          <div class="feat-icon"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12l3 3 7-7"/><path d="M2 13l4-4 4 2 4-4 4 2 4-4"/></svg></div>
+          <div class="feat-body"><strong>Дружное комьюнити</strong><span>Активный Discord-сервер и поддержка новичков на всех этапах</span></div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PERSONNEL SECTION -->
+<section id="personnel">
+  <div class="container">
+    <div class="section-header reveal">
+      <p class="section-eyebrow">Раздел 1</p>
+      <h2 class="section-title">Персонал проекта</h2>
+      <p class="section-desc">Хочешь стать частью команды? Выбери должность и заполни анкету — мы свяжемся с тобой в ближайшее время.</p>
+    </div>
+
+    <div class="tabs-row reveal">
+      <button class="tab-btn" onclick="openForm('staff','mod')" id="tab-staff-mod">
+        <span class="tab-icon"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></svg></span> Модератор
+      </button>
+      <button class="tab-btn" onclick="openForm('staff','comgr')" id="tab-staff-comgr">
+        <span class="tab-icon"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Комьюнити-менеджер
+      </button>
+    </div>
+
+    <!-- MODERATION FORM -->
+    <div class="form-panel" id="form-staff-mod">
+      <div class="form-card">
+        <div class="form-card-header">
+          <div class="form-icon"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></svg></div>
+          <div>
+            <h3>Заявка на модератора</h3>
+            <p>Следи за порядком и помогай участникам соблюдать правила проекта</p>
+          </div>
+        </div>
+        <form onsubmit="return false;" id="fStaffMod">
+          <div class="form-progress">
+            <div class="form-progress-track"><div class="form-progress-fill" id="prog-fStaffMod"></div></div>
+            <span class="form-progress-label" id="prog-label-fStaffMod">0 / 7</span>
+          </div>
+          <div class="form-grid">
+            <!-- Messenger -->
+            <div class="form-group full">
+              <label>Ваш мессенджер *</label>
+              <div class="messenger-toggle">
+                <button type="button" class="msg-btn selected" onclick="selectMsg(this,'fStaffMod','ds')" data-val="Discord">
+                  <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.099 18.08.11 18.102.128 18.116a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.027c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+                  Discord
+                </button>
+                <button type="button" class="msg-btn" onclick="selectMsg(this,'fStaffMod','tg')" data-val="Telegram">
+                  <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.96 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                  Telegram
+                </button>
+              </div>
+              <label class="nick-label" id="fStaffMod-nick-label">Discord никнейм *</label>
+              <input type="text" id="fStaffMod-nick" placeholder="Например: nova#1234" required data-label="Никнейм" onchange="checkForm('fStaffMod')" oninput="checkForm('fStaffMod')">
+              <input type="hidden" id="fStaffMod-mstype" value="Discord">
+            </div>
+            <div class="form-group">
+              <label>Электронная почта *</label>
+              <input type="email" id="fStaffMod-email" placeholder="your@email.com" required onchange="checkForm('fStaffMod')" oninput="checkForm('fStaffMod')">
+            </div>
+            <div class="form-group">
+              <label>Ваш возраст *</label>
+              <input type="number" id="fStaffMod-age" placeholder="Например: 18" min="8" max="99" required onchange="checkForm('fStaffMod')" oninput="checkForm('fStaffMod')">
+            </div>
+            <div class="form-group full">
+              <label>Опыт в модерации *</label>
+              <textarea id="fStaffMod-exp" placeholder="Расскажите о своём опыте: предыдущие проекты, роли, сколько лет..." required onchange="checkForm('fStaffMod')" oninput="checkForm('fStaffMod')"></textarea>
+            </div>
+            <div class="form-group full">
+              <label>С какой целью вступаете на должность? *</label>
+              <textarea id="fStaffMod-goal" placeholder="Что вас привлекает в роли модератора именно в Neway RP?" required onchange="checkForm('fStaffMod')" oninput="checkForm('fStaffMod')"></textarea>
+            </div>
+            <div class="form-group full">
+              <label>Как узнали о проекте? *</label>
+              <input type="text" id="fStaffMod-how" placeholder="Через друга, Discord, соцсети..." required onchange="checkForm('fStaffMod')" oninput="checkForm('fStaffMod')">
+            </div>
+            <div class="form-group full">
+              <label>Знакомы с правилами проекта? *</label>
+              <div class="radio-row">
+                <label class="radio-pill"><input type="radio" name="fStaffMod-rules" value="Да" onchange="checkForm('fStaffMod')"><label>✅ Да, ознакомлен(а)</label></label>
+                <label class="radio-pill"><input type="radio" name="fStaffMod-rules" value="Не полностью" onchange="checkForm('fStaffMod')"><label>📖 Не полностью</label></label>
+              </div>
+            </div>
+          </div>
+          <div class="submit-area">
+            <span class="submit-note">Все поля обязательны</span>
+            <button type="button" class="btn-submit" id="sub-fStaffMod" onclick="submitForm('fStaffMod','Заявка на модератора')">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+              Отправить заявку
+            </button>
+          </div>
+        </form>
+        <div class="success-banner" id="succ-fStaffMod">
+          <div class="success-icon">🎉</div>
+          <h4>Заявка отправлена!</h4>
+          <p>Мы рассмотрим вашу заявку на модератора и свяжемся с вами через указанный мессенджер.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMMUNITY-MANAGER FORM -->
+    <div class="form-panel" id="form-staff-comgr">
+      <div class="form-card">
+        <div class="form-card-header">
+          <div class="form-icon"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <div>
+            <h3>Заявка на комьюнити-менеджера</h3>
+            <p>Развивай сообщество, организуй ивенты и поддерживай атмосферу дружбы</p>
+          </div>
+        </div>
+        <form onsubmit="return false;" id="fStaffComgr">
+          <div class="form-progress">
+            <div class="form-progress-track"><div class="form-progress-fill" id="prog-fStaffComgr"></div></div>
+            <span class="form-progress-label" id="prog-label-fStaffComgr">0 / 6</span>
+          </div>
+          <div class="form-grid">
+            <div class="form-group full">
+              <label>Ваш мессенджер *</label>
+              <div class="messenger-toggle">
+                <button type="button" class="msg-btn selected" onclick="selectMsg(this,'fStaffComgr','ds')" data-val="Discord">
+                  <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.099 18.08.11 18.102.128 18.116a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.027c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+                  Discord
+                </button>
+                <button type="button" class="msg-btn" onclick="selectMsg(this,'fStaffComgr','tg')" data-val="Telegram">
+                  <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.96 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                  Telegram
+                </button>
+              </div>
+              <label class="nick-label" id="fStaffComgr-nick-label">Discord никнейм *</label>
+              <input type="text" id="fStaffComgr-nick" placeholder="Например: nova#1234" required onchange="checkForm('fStaffComgr')" oninput="checkForm('fStaffComgr')">
+              <input type="hidden" id="fStaffComgr-mstype" value="Discord">
+            </div>
+            <div class="form-group">
+              <label>Электронная почта *</label>
+              <input type="email" id="fStaffComgr-email" placeholder="your@email.com" required onchange="checkForm('fStaffComgr')" oninput="checkForm('fStaffComgr')">
+            </div>
+            <div class="form-group">
+              <label>Ваш возраст *</label>
+              <input type="number" id="fStaffComgr-age" placeholder="Например: 18" min="8" max="99" required onchange="checkForm('fStaffComgr')" oninput="checkForm('fStaffComgr')">
+            </div>
+            <div class="form-group full">
+              <label>Опыт в комьюнити менеджменте *</label>
+              <textarea id="fStaffComgr-exp" placeholder="Предыдущие проекты, роли, достижения..." required onchange="checkForm('fStaffComgr')" oninput="checkForm('fStaffComgr')"></textarea>
+            </div>
+            <div class="form-group full">
+              <label>Ваши идеи для развития сообщества *</label>
+              <textarea id="fStaffComgr-goal" placeholder="Какие ивенты, активности и инициативы хотите привнести?" required onchange="checkForm('fStaffComgr')" oninput="checkForm('fStaffComgr')"></textarea>
+            </div>
+            <div class="form-group full">
+              <label>Как узнали о проекте? *</label>
+              <input type="text" id="fStaffComgr-how" placeholder="Через друга, Discord, соцсети..." required onchange="checkForm('fStaffComgr')" oninput="checkForm('fStaffComgr')">
+            </div>
+          </div>
+          <div class="submit-area">
+            <span class="submit-note">Все поля обязательны</span>
+            <button type="button" class="btn-submit" id="sub-fStaffComgr" onclick="submitForm('fStaffComgr','Заявка на комьюнити-менеджера')">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+              Отправить заявку
+            </button>
+          </div>
+        </form>
+        <div class="success-banner" id="succ-fStaffComgr">
+          <div class="success-icon">🎉</div>
+          <h4>Заявка отправлена!</h4>
+          <p>Мы рассмотрим вашу заявку на комьюнити-менеджера и свяжемся с вами в ближайшее время.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- RP LICENSES SECTION -->
+<section id="rplicenses">
+  <div class="container">
+    <div class="section-header reveal">
+      <p class="section-eyebrow">Раздел 2</p>
+      <h2 class="section-title">РП лицензии</h2>
+      <p class="section-desc">Получи официальную лицензию для ролевых активностей в проекте.</p>
+    </div>
+
+    <div class="tabs-row reveal">
+      <button class="tab-btn" onclick="openForm('rp','basic')" id="tab-rp-basic">
+        <span class="tab-icon">📄</span> Участник РП
+      </button>
+      <button class="tab-btn" onclick="openForm('rp','advanced')" id="tab-rp-advanced">
+        <span class="tab-icon">⭐</span> Руководитель сессии
+      </button>
+    </div>
+
+    <!-- BASIC RP FORM -->
+    <div class="form-panel" id="form-rp-basic">
+      <div class="form-card">
+        <div class="form-card-header">
+          <div class="form-icon">📄</div>
+          <div>
+            <h3>Участник РП</h3>
+            <p>Позволяет участвовать в стандартных ролевых сессиях проекта</p>
+          </div>
+        </div>
+        <form onsubmit="return false;" id="fRpBasic">
+          <div class="form-progress">
+            <div class="form-progress-track"><div class="form-progress-fill" id="prog-fRpBasic"></div></div>
+            <span class="form-progress-label" id="prog-label-fRpBasic">0 / 5</span>
+          </div>
+          <div class="form-grid">
+            <div class="form-group full">
+              <label>Ваш мессенджер *</label>
+              <div class="messenger-toggle">
+                <button type="button" class="msg-btn selected" onclick="selectMsg(this,'fRpBasic','ds')" data-val="Discord">
+                  <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.099 18.08.11 18.102.128 18.116a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.027c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+                  Discord
+                </button>
+                <button type="button" class="msg-btn" onclick="selectMsg(this,'fRpBasic','tg')" data-val="Telegram">
+                  <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.96 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                  Telegram
+                </button>
+              </div>
+              <label class="nick-label" id="fRpBasic-nick-label">Discord никнейм *</label>
+              <input type="text" id="fRpBasic-nick" placeholder="Например: nova#1234" required onchange="checkForm('fRpBasic')" oninput="checkForm('fRpBasic')">
+              <input type="hidden" id="fRpBasic-mstype" value="Discord">
+            </div>
+            <div class="form-group">
+              <label>Электронная почта *</label>
+              <input type="email" id="fRpBasic-email" placeholder="your@email.com" required onchange="checkForm('fRpBasic')" oninput="checkForm('fRpBasic')">
+            </div>
+            <div class="form-group">
+              <label>Ваш возраст *</label>
+              <input type="number" id="fRpBasic-age" placeholder="Например: 18" min="8" max="99" required onchange="checkForm('fRpBasic')" oninput="checkForm('fRpBasic')">
+            </div>
+            <!-- FIX: заменён вопрос о персонаже на вопрос о знании РП и предпочтениях тематики -->
+            <div class="form-group full">
+              <label>Что вы знаете о ролевых играх? Какую тематику предпочитаете? *</label>
+              <textarea id="fRpBasic-rp-knowledge" placeholder="Расскажите, что вам известно о РП в принципе: что такое ролевые игры, как вы в них участвовали (или не участвовали). Также укажите, какую тематику предпочитаете — городской РП, фэнтези, детектив, исторический и т.д." required style="min-height: 130px;" onchange="checkForm('fRpBasic')" oninput="checkForm('fRpBasic')"></textarea>
+            </div>
+            <div class="form-group full">
+              <label>Как узнали о проекте? *</label>
+              <input type="text" id="fRpBasic-how" placeholder="Через друга, Discord, соцсети..." required onchange="checkForm('fRpBasic')" oninput="checkForm('fRpBasic')">
+            </div>
+          </div>
+          <div class="submit-area">
+            <span class="submit-note">Все поля обязательны</span>
+            <button type="button" class="btn-submit" id="sub-fRpBasic" onclick="submitForm('fRpBasic','Участник РП')">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+              Подать заявку
+            </button>
+          </div>
+        </form>
+        <div class="success-banner" id="succ-fRpBasic">
+          <div class="success-icon">🎉</div>
+          <h4>Заявка отправлена!</h4>
+          <p>Заявка на лицензию «Участник РП» принята. Мы свяжемся с вами через указанный мессенджер.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADVANCED RP FORM -->
+    <div class="form-panel" id="form-rp-advanced">
+      <div class="form-card">
+        <div class="form-card-header">
+          <div class="form-icon">⭐</div>
+          <div>
+            <h3>Руководитель сессии</h3>
+            <p>Открывает доступ к проведению РП-сессий, сложным сюжетам и особым ролям</p>
+          </div>
+        </div>
+        <form onsubmit="return false;" id="fRpAdv">
+          <div class="form-progress">
+            <div class="form-progress-track"><div class="form-progress-fill" id="prog-fRpAdv"></div></div>
+            <span class="form-progress-label" id="prog-label-fRpAdv">0 / 6</span>
+          </div>
+          <div class="form-grid">
+            <div class="form-group full">
+              <label>Ваш мессенджер *</label>
+              <div class="messenger-toggle">
+                <button type="button" class="msg-btn selected" onclick="selectMsg(this,'fRpAdv','ds')" data-val="Discord">
+                  <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.099 18.08.11 18.102.128 18.116a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.027c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+                  Discord
+                </button>
+                <button type="button" class="msg-btn" onclick="selectMsg(this,'fRpAdv','tg')" data-val="Telegram">
+                  <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.96 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                  Telegram
+                </button>
+              </div>
+              <label class="nick-label" id="fRpAdv-nick-label">Discord никнейм *</label>
+              <input type="text" id="fRpAdv-nick" placeholder="Например: nova#1234" required onchange="checkForm('fRpAdv')" oninput="checkForm('fRpAdv')">
+              <input type="hidden" id="fRpAdv-mstype" value="Discord">
+            </div>
+            <div class="form-group">
+              <label>Электронная почта *</label>
+              <input type="email" id="fRpAdv-email" placeholder="your@email.com" required onchange="checkForm('fRpAdv')" oninput="checkForm('fRpAdv')">
+            </div>
+            <div class="form-group">
+              <label>Ваш возраст *</label>
+              <input type="number" id="fRpAdv-age" placeholder="Например: 18" min="8" max="99" required onchange="checkForm('fRpAdv')" oninput="checkForm('fRpAdv')">
+            </div>
+            <div class="form-group full">
+              <label>Опыт в ролевых играх *</label>
+              <textarea id="fRpAdv-exp" placeholder="Расскажите о вашем опыте в РП: сколько лет, какие проекты, роли..." required onchange="checkForm('fRpAdv')" oninput="checkForm('fRpAdv')"></textarea>
+            </div>
+            <div class="form-group full">
+              <label>Что вы знаете о ролевых играх? Какую тематику предпочитаете? *</label>
+              <textarea id="fRpAdv-rp-knowledge" placeholder="Опишите своё понимание РП механик, стилей и предпочитаемую тематику." required style="min-height: 120px;" onchange="checkForm('fRpAdv')" oninput="checkForm('fRpAdv')"></textarea>
+            </div>
+            <div class="form-group full">
+              <label>Как узнали о проекте? *</label>
+              <input type="text" id="fRpAdv-how" placeholder="Через друга, Discord, соцсети..." required onchange="checkForm('fRpAdv')" oninput="checkForm('fRpAdv')">
+            </div>
+          </div>
+          <div class="submit-area">
+            <span class="submit-note">Все поля обязательны</span>
+            <button type="button" class="btn-submit" id="sub-fRpAdv" onclick="submitForm('fRpAdv','Руководитель сессии')">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+              Подать заявку
+            </button>
+          </div>
+        </form>
+        <div class="success-banner" id="succ-fRpAdv">
+          <div class="success-icon">🎉</div>
+          <h4>Заявка отправлена!</h4>
+          <p>Заявка на лицензию «Руководитель сессии» принята. Мы свяжемся с вами через указанный мессенджер.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- RULES SECTION — 2 раздела: Discord и РП -->
+<section id="rules" class="rules-section">
+  <div class="container">
+    <div class="section-header reveal">
+      <p class="section-eyebrow">Правила</p>
+      <h2 class="section-title">Правила проекта</h2>
+      <p class="section-desc">Правила помогают поддерживать комфортную атмосферу для всех участников.</p>
+    </div>
+
+    <div class="rules-tabs-row reveal">
+      <button class="rules-tab-btn active" onclick="openRulesTab('discord', event)">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.099 18.08.11 18.102.128 18.116a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.027c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+        Правила Discord
+      </button>
+      <button class="rules-tab-btn" onclick="openRulesTab('rp', event)">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        Правила РП
+      </button>
+    </div>
+
+    <!-- DISCORD RULES -->
+    <div class="rules-panel open" id="rules-panel-discord">
+      <div class="rules-category-header">
+        <span class="rules-cat-label">
+          <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.099 18.08.11 18.102.128 18.116a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.027c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+          Discord — правила сервера
+        </span>
+      </div>
+      <div class="rules-grid">
+
+        <div class="rule-card rule-card-ds">
+          <div class="rule-num rule-num-ds">01</div>
+          <div class="rule-body">
+            <span class="rule-title">Условия Discord</span>
+            <p class="rule-text">Следуйте и соблюдайте <a href="https://discord.com/terms" target="_blank">Условия предоставления услуг Discord и руководящие принципы сообщества</a>.</p>
+          </div>
+        </div>
+
+        <div class="rule-card rule-card-ds">
+          <div class="rule-num rule-num-ds">02</div>
+          <div class="rule-body">
+            <span class="rule-title">Оскорбления</span>
+            <p class="rule-text">Воздерживайтесь от использования расовых или оскорбительных высказываний.</p>
+            <span class="rule-penalty mute">Мут 24ч</span>
+          </div>
+        </div>
+
+        <div class="rule-card rule-card-ds">
+          <div class="rule-num rule-num-ds">03</div>
+          <div class="rule-body">
+            <span class="rule-title">Спам</span>
+            <p class="rule-text">Не рассылайте спам и не наводняйте каналы сообщениями или файлами.</p>
+            <span class="rule-penalty mute">Мут 24ч</span>
+          </div>
+        </div>
+
+        <div class="rule-card rule-card-ds">
+          <div class="rule-num rule-num-ds">04</div>
+          <div class="rule-body">
+            <span class="rule-title">NSFW контент</span>
+            <p class="rule-text">NSFW или контент для взрослых, который может быть чувствителен к молодой аудитории, запрещён.</p>
+            <span class="rule-penalty mute">Мут 24ч</span>
+          </div>
+        </div>
+
+        <div class="rule-card rule-card-ds">
+          <div class="rule-num rule-num-ds">05</div>
+          <div class="rule-body">
+            <span class="rule-title">Назначение каналов</span>
+            <p class="rule-text">Используйте каналы по их прямому назначению, не флудите и не оффтопьте в них.</p>
+            <span class="rule-penalty mute">Мут 24ч</span>
+          </div>
+        </div>
+
+        <div class="rule-card rule-card-ds">
+          <div class="rule-num rule-num-ds">06</div>
+          <div class="rule-body">
+            <span class="rule-title">Вредоносные ссылки</span>
+            <p class="rule-text">Любые подозрительные или возможно вредоносные ссылки запрещены.</p>
+            <span class="rule-penalty ban">Бан навсегда</span>
+          </div>
+        </div>
+
+        <div class="rule-card rule-card-ds">
+          <div class="rule-num rule-num-ds">07</div>
+          <div class="rule-body">
+            <span class="rule-title">Щекотливые темы</span>
+            <p class="rule-text">Не поднимайте тем, которые могут оскорбить другого пользователя: религия, политические взгляды и подобное.</p>
+            <span class="rule-penalty mute-long">Мут 168ч</span>
+          </div>
+        </div>
+
+        <div class="rule-card rule-card-ds">
+          <div class="rule-num rule-num-ds">08</div>
+          <div class="rule-body">
+            <span class="rule-title">Обход модерации</span>
+            <p class="rule-text">Не пытайтесь избежать действий модерации, выполняемых в отношении вашей учётной записи.</p>
+            <span class="rule-penalty ban-temp">Бан на 29 дней</span>
+          </div>
+        </div>
+
+        <div class="rule-card rule-card-ds">
+          <div class="rule-num rule-num-ds">09</div>
+          <div class="rule-body">
+            <span class="rule-title">Реклама</span>
+            <p class="rule-text">Не используйте другие каналы для продвижения серверов или аккаунтов в соцсетях — только рекламный канал.</p>
+            <span class="rule-penalty ban">Бан навсегда</span>
+          </div>
+        </div>
+
+        <div class="rule-card rule-card-ds">
+          <div class="rule-num rule-num-ds">10</div>
+          <div class="rule-body">
+            <span class="rule-title">Разжигание ненависти</span>
+            <p class="rule-text">Не используйте прямые или косвенные формы разжигания ненависти.</p>
+            <span class="rule-penalty mute">Мут 24ч</span>
+          </div>
+        </div>
+
+        <div class="rule-card rule-card-ds">
+          <div class="rule-num rule-num-ds">11</div>
+          <div class="rule-body">
+            <span class="rule-title">Экстремизм</span>
+            <p class="rule-text">Пропаганда ультраправых идеологий, террористических и нежелательных организаций наказывается.</p>
+            <span class="rule-penalty ban-appeal">Бан навсегда без АПП</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- RP RULES -->
+    <div class="rules-panel" id="rules-panel-rp">
+      <div class="rules-category-header">
+        <span class="rules-cat-label rp">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          РП — правила ролевых игр
+        </span>
+      </div>
+      <div class="rules-grid">
+
+        <div class="rule-card rule-card-rp">
+          <div class="rule-num rp-num">РП1</div>
+          <div class="rule-body">
+            <span class="rule-title">НонРП поведение</span>
+            <p class="rule-text">Запрещено нарушать логику РП-мира: действия вашего персонажа должны соответствовать сеттингу и обстоятельствам. НонРП поведение ведёт к прерыванию сессии.</p>
+            <span class="rule-penalty mute">Предупреждение / Кик из сессии</span>
+          </div>
+        </div>
+
+        <div class="rule-card rule-card-rp">
+          <div class="rule-num rp-num">РП2</div>
+          <div class="rule-body">
+            <span class="rule-title">Метагейминг</span>
+            <p class="rule-text">Запрещено использовать информацию, полученную вне игры (OOC), для принятия решений в игре (IC). Персонаж знает только то, что узнал в рамках сессии.</p>
+            <span class="rule-penalty mute">Предупреждение + Дисквалификация из сессии</span>
+          </div>
+        </div>
+
+        <div class="rule-card rule-card-rp">
+          <div class="rule-num rp-num">РП3</div>
+          <div class="rule-body">
+            <span class="rule-title">Годмодинг</span>
+            <p class="rule-text">Запрещено наделять своего персонажа неограниченными способностями, игнорировать урон и действия других участников, а также самовольно управлять чужими персонажами.</p>
+            <span class="rule-penalty ban-temp">Отзыв лицензии на 7 дней</span>
+          </div>
+        </div>
+
+        <div class="rule-card rule-card-rp">
+          <div class="rule-num rp-num">РП4</div>
+          <div class="rule-body">
+            <span class="rule-title">Соблюдение атмосферы</span>
+            <p class="rule-text">Не нарушайте атмосферу сессии OOC-сообщениями в игровых каналах без разрешения мастера. Используйте [OOC] тег или отдельный канал для внеигрового общения.</p>
+            <span class="rule-penalty mute">Предупреждение</span>
+          </div>
+        </div>
+
+        <div class="rule-card rule-card-rp">
+          <div class="rule-num rp-num">РП5</div>
+          <div class="rule-body">
+            <span class="rule-title">Согласие участников</span>
+            <p class="rule-text">Перед вводом тёмных или взрослых сюжетных линий необходимо согласие всех участников сессии. При несогласии хотя бы одного — тема исключается.</p>
+            <span class="rule-penalty ban-temp">Отзыв лицензии</span>
+          </div>
+        </div>
+
+        <div class="rule-card rule-card-rp">
+          <div class="rule-num rp-num">РП6</div>
+          <div class="rule-body">
+            <span class="rule-title">Уважение к мастеру</span>
+            <p class="rule-text">Решения мастера (ведущего) обязательны к исполнению во время сессии. Возражения и апелляции принимаются только после завершения сессии через администрацию.</p>
+            <span class="rule-penalty mute-long">Мут + Дисквалификация из сессии</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DISCORD BANNER -->
+<div class="discord-section">
+  <div class="container">
+    <div class="discord-card reveal">
+      <div class="discord-card-text">
+        <h2>Присоединяйся к нам в Discord</h2>
+        <p>Живое общение, анонсы ивентов, ролевые сессии и поддержка — всё это на нашем сервере.</p>
+      </div>
+      <a href="https://discord.gg/nXKBABjTN6" target="_blank" class="btn-discord">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.099 18.08.11 18.102.128 18.116a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.027c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+        Перейти на сервер
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- CONTACTS -->
+<section id="contacts">
+  <div class="container">
+    <div class="section-header reveal">
+      <p class="section-eyebrow">Контакты</p>
+      <h2 class="section-title">Связаться с нами</h2>
+      <p class="section-desc">Есть вопросы? Напишите нам через удобный способ связи.</p>
+    </div>
+    <div class="contacts-grid reveal">
+      <a href="https://discord.gg/nXKBABjTN6" target="_blank" class="contact-card">
+        <div class="contact-icon ds">
+          <svg class="icon-inline" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.099 18.08.11 18.102.128 18.116a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.027c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+        </div>
+        <div class="contact-body">
+          <strong>Discord сервер</strong>
+          <span>discord.gg/nXKBABjTN6</span>
+        </div>
+      </a>
+      <a href="mailto:ground.ds.project@gmail.com" class="contact-card">
+        <div class="contact-icon gm">📧</div>
+        <div class="contact-body">
+          <strong>Электронная почта</strong>
+          <span>ground.ds.project@gmail.com</span>
+        </div>
+      </a>
+      <a href="#" class="contact-card">
+        <div class="contact-icon tg">
+          <svg class="icon-inline" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.96 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+        </div>
+        <div class="contact-body">
+          <strong>Telegram</strong>
+          <span>Скоро</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>© 2026 Neway RP — Все права защищены. Проект создан для творческого ролевого взаимодействия.</p>
+  </div>
+</footer>
+
+</div><!-- /wrapper -->
+
+<script>
+// ── LOADER ──
+window.addEventListener('load', () => {
+  setTimeout(() => document.getElementById('loader').classList.add('gone'), 1200);
+});
+
+// ── THEME ──
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') !== 'light';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('btnDark').classList.toggle('active', !isDark);
+  document.getElementById('btnLight').classList.toggle('active', isDark);
+  localStorage.setItem('neway-theme', isDark ? 'light' : 'dark');
+}
+(function() {
+  const saved = localStorage.getItem('neway-theme');
+  if (saved === 'light') {
+    document.documentElement.setAttribute('data-theme','light');
+    document.getElementById('btnDark').classList.remove('active');
+    document.getElementById('btnLight').classList.add('active');
+  }
+})();
+
+// ── SCROLL REVEAL ──
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ── PARTICLES ──
+(function() {
+  const canvas = document.getElementById('particles-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+
+  function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function randomBetween(a, b) { return a + Math.random() * (b - a); }
+
+  class Particle {
+    constructor() { this.reset(); }
+    reset() {
+      this.x = randomBetween(0, W);
+      this.y = randomBetween(0, H);
+      this.r = randomBetween(1, 2.5);
+      this.vx = randomBetween(-0.3, 0.3);
+      this.vy = randomBetween(-0.3, 0.3);
+      this.alpha = randomBetween(0.2, 0.7);
+    }
+    update() {
+      this.x += this.vx; this.y += this.vy;
+      if (this.x < 0 || this.x > W || this.y < 0 || this.y > H) this.reset();
+    }
+    draw() {
+      const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+      const c = isDark ? '96,165,250' : '13,148,136';
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${c},${this.alpha})`;
+      ctx.fill();
+    }
+  }
+
+  for (let i = 0; i < 60; i++) particles.push(new Particle());
+
+  function animate() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => { p.update(); p.draw(); });
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+
+// ── FORM TAB OPEN (staff & rp) ──
+function openForm(section, key) {
+  // Close all panels in this section
+  document.querySelectorAll(`[id^="form-${section}-"]`).forEach(p => p.classList.remove('open'));
+  document.querySelectorAll(`[id^="tab-${section}-"]`).forEach(b => b.classList.remove('active'));
+  const panel = document.getElementById(`form-${section}-${key}`);
+  const tab = document.getElementById(`tab-${section}-${key}`);
+  if (panel) panel.classList.add('open');
+  if (tab) tab.classList.add('active');
+}
+
+// ── RULES TAB ──
+function openRulesTab(tab, evt) {
+  document.querySelectorAll('.rules-panel').forEach(p => p.classList.remove('open'));
+  document.querySelectorAll('.rules-tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('rules-panel-' + tab).classList.add('open');
+  const e = evt || window.event;
+  if (e && e.currentTarget) e.currentTarget.classList.add('active');
+}
+
+// ── MESSENGER SELECT ──
+function selectMsg(btn, formId, type) {
+  const wrap = btn.closest('.messenger-toggle');
+  wrap.querySelectorAll('.msg-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  const msInput = document.getElementById(formId + '-mstype');
+  if (msInput) msInput.value = btn.dataset.val;
+  const nickInput = document.getElementById(formId + '-nick');
+  const nickLabel = document.getElementById(formId + '-nick-label');
+  if (nickInput) {
+    nickInput.placeholder = type === 'ds' ? 'Например: nova#1234' : 'Например: @nova_username';
+  }
+  if (nickLabel) {
+    nickLabel.textContent = type === 'ds' ? 'Discord никнейм *' : 'Telegram @username *';
+  }
+  checkForm(formId);
+}
+
+// ── FORM CHECK (progress + submit enable) ──
+const FORM_FIELDS = {
+  fStaffMod:   ['fStaffMod-nick','fStaffMod-email','fStaffMod-age','fStaffMod-exp','fStaffMod-goal','fStaffMod-how'],
+  fStaffComgr: ['fStaffComgr-nick','fStaffComgr-email','fStaffComgr-age','fStaffComgr-exp','fStaffComgr-goal','fStaffComgr-how'],
+  fRpBasic:    ['fRpBasic-nick','fRpBasic-email','fRpBasic-age','fRpBasic-rp-knowledge','fRpBasic-how'],
+  fRpAdv:      ['fRpAdv-nick','fRpAdv-email','fRpAdv-age','fRpAdv-exp','fRpAdv-rp-knowledge','fRpAdv-how'],
+};
+
+function checkForm(formId) {
+  const fields = FORM_FIELDS[formId] || [];
+  const total = fields.length;
+  let filled = 0;
+  fields.forEach(fid => {
+    const el = document.getElementById(fid);
+    if (el && el.value.trim()) filled++;
+  });
+  // Also check radio groups
+  const form = document.getElementById(formId);
+  if (form) {
+    const radioGroups = {};
+    form.querySelectorAll('input[type="radio"]').forEach(r => {
+      if (!radioGroups[r.name]) radioGroups[r.name] = false;
+      if (r.checked) radioGroups[r.name] = true;
+    });
+    // Radio filled count already in total for fStaffMod
+    Object.values(radioGroups).forEach(checked => { if (checked) filled++; });
+  }
+
+  const fill = document.getElementById('prog-' + formId);
+  const label = document.getElementById('prog-label-' + formId);
+  const btn = document.getElementById('sub-' + formId);
+  const realTotal = formId === 'fStaffMod' ? total + 1 : total; // +1 for radio
+  if (fill) fill.style.width = Math.min(100, (filled / realTotal) * 100) + '%';
+  if (label) {
+    label.textContent = filled + ' / ' + realTotal;
+    label.classList.toggle('done', filled >= realTotal);
+  }
+  if (btn) btn.classList.toggle('ready', filled >= realTotal);
+}
+
+// ── SUBMIT FORM ──
+async function submitForm(formId, licenseType) {
+  const btn = document.getElementById('sub-' + formId);
+  if (!btn || !btn.classList.contains('ready')) return;
+
+  btn.disabled = true;
+  btn.textContent = 'Отправка...';
+
+  // Collect data
+  const get = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  const getRadio = name => { const el = document.querySelector(`input[name="${name}"]:checked`); return el ? el.value : ''; };
+
+  let payload = {
+    license_type: licenseType,
+    status: 'new',
+  };
+
+  if (formId === 'fStaffMod') {
+    payload = { ...payload,
+      messenger_type: get('fStaffMod-mstype'),
+      nickname: get('fStaffMod-nick'),
+      email: get('fStaffMod-email'),
+      age: parseInt(get('fStaffMod-age')) || null,
+      experience: get('fStaffMod-exp'),
+      goal: get('fStaffMod-goal'),
+      how_found: get('fStaffMod-how'),
+      knows_rules: getRadio('fStaffMod-rules'),
+    };
+  } else if (formId === 'fStaffComgr') {
+    payload = { ...payload,
+      messenger_type: get('fStaffComgr-mstype'),
+      nickname: get('fStaffComgr-nick'),
+      email: get('fStaffComgr-email'),
+      age: parseInt(get('fStaffComgr-age')) || null,
+      experience: get('fStaffComgr-exp'),
+      goal: get('fStaffComgr-goal'),
+      how_found: get('fStaffComgr-how'),
+    };
+  } else if (formId === 'fRpBasic') {
+    payload = { ...payload,
+      messenger_type: get('fRpBasic-mstype'),
+      nickname: get('fRpBasic-nick'),
+      email: get('fRpBasic-email'),
+      age: parseInt(get('fRpBasic-age')) || null,
+      theme: get('fRpBasic-rp-knowledge'),
+      how_found: get('fRpBasic-how'),
+    };
+  } else if (formId === 'fRpAdv') {
+    payload = { ...payload,
+      messenger_type: get('fRpAdv-mstype'),
+      nickname: get('fRpAdv-nick'),
+      email: get('fRpAdv-email'),
+      age: parseInt(get('fRpAdv-age')) || null,
+      experience: get('fRpAdv-exp'),
+      theme: get('fRpAdv-rp-knowledge'),
+      how_found: get('fRpAdv-how'),
+    };
+  }
+
+  try {
+    const { error } = await supabaseClient.from('submissions').insert([payload]);
+    if (error) throw error;
+    // Success
+    document.getElementById(formId).style.display = 'none';
+    document.getElementById('succ-' + formId).classList.add('show');
+  } catch (err) {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg> Ошибка — попробуйте снова';
+    btn.classList.add('ready');
+    console.error('Submit error:', err);
+  }
+}
+
+// Init checkForm for all
+Object.keys(FORM_FIELDS).forEach(fid => checkForm(fid));
+</script>
+
+<!-- ══════════════════════════════════════════
+     AUTH MODAL
+══════════════════════════════════════════ -->
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-modal" id="authModal">
+    <button class="auth-modal-close" id="authModalClose" onclick="closeAuthModal()">✕</button>
+
+    <div class="auth-modal-logo">
+      <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="14" cy="14" r="12" stroke="#60A5FA" stroke-width="2"/>
+        <path d="M8 14 L14 8 L20 14 L14 20 Z" fill="#3B82F6" opacity=".7"/>
+        <circle cx="14" cy="14" r="3" fill="#60A5FA"/>
+      </svg>
+      Neway RP
+    </div>
+    <p class="auth-modal-sub">Войди или зарегистрируйся, чтобы подавать заявки</p>
+
+    <div class="auth-tabs" id="authTabs">
+      <button class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">Вход</button>
+      <button class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')">Регистрация</button>
+    </div>
+
+    <div class="auth-error" id="authError"></div>
+
+    <!-- ВХОД -->
+    <div id="panelLogin">
+      <div class="auth-field">
+        <label>Логин (e-mail)</label>
+        <input type="email" id="loginEmail" placeholder="your@email.com" autocomplete="username">
+      </div>
+      <div class="auth-field">
+        <label>Токен (ваш пароль)</label>
+        <input type="password" id="loginToken" placeholder="Введите токен из регистрации" autocomplete="current-password">
+      </div>
+      <button class="auth-submit" id="loginBtn" onclick="doAuthLogin()">
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+        Войти
+      </button>
+    </div>
+
+    <!-- РЕГИСТРАЦИЯ -->
+    <div id="panelRegister" style="display:none;">
+      <div class="auth-field">
+        <label>Логин (e-mail) *</label>
+        <input type="email" id="regEmail" placeholder="your@email.com" autocomplete="email">
+      </div>
+      <div class="auth-field">
+        <label>Привязка мессенджера *</label>
+        <div class="auth-ms-row">
+          <button type="button" class="auth-ms-btn sel" id="ms-ds" onclick="selectAuthMs('discord')">
+            <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.099 18.08.11 18.102.128 18.116a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.027c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+            Discord
+          </button>
+          <button type="button" class="auth-ms-btn" id="ms-tg" onclick="selectAuthMs('telegram')">
+            <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.96 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+            Telegram
+          </button>
+        </div>
+        <input type="text" id="regNick" placeholder="Ваш ник без @ (например: username)" style="margin-top:8px;" autocomplete="off">
+      </div>
+      <button class="auth-submit" id="registerBtn" onclick="doAuthRegister()">
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Зарегистрироваться
+      </button>
+    </div>
+
+    <!-- ТОКЕН -->
+    <div id="panelToken" style="display:none;" class="token-screen">
+      <div class="token-icon">🔑</div>
+      <h3>Регистрация прошла успешно!</h3>
+      <p>Это твой токен — он является паролем для входа.<br>Сохрани его прямо сейчас.</p>
+      <div class="token-box" id="tokenValueDisplay" onclick="copyToken()" title="Нажми чтобы скопировать">••••••••</div>
+      <p class="token-copy-hint">Нажми на токен, чтобы скопировать</p>
+      <div class="token-warn">
+        ⚠️ <span>Запиши или сохрани токен — восстановить его будет невозможно. После закрытия окна он не отобразится повторно.</span>
+      </div>
+      <button class="token-close-btn" id="tokenCloseBtn" disabled onclick="closeAfterToken()">Закрыть окно</button>
+      <p class="token-countdown" id="tokenCountdown">Закрыть можно через <strong id="tokenSec">5</strong> сек.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   AUTH — использует window.supabaseClient
+   (изолирован от adminSupabaseClient)
+══════════════════════════════════════════ */
+let _authMs = 'discord';
+let _currentToken = '';
+
+function generateToken() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let t = '';
+  for (let i = 0; i < 16; i++) {
+    if (i > 0 && i % 4 === 0) t += '-';
+    t += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return t;
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('authError');
+  el.textContent = msg; el.classList.add('show');
+}
+function clearAuthError() { document.getElementById('authError').classList.remove('show'); }
+
+function selectAuthMs(type) {
+  _authMs = type;
+  document.getElementById('ms-ds').classList.toggle('sel', type === 'discord');
+  document.getElementById('ms-tg').classList.toggle('sel', type === 'telegram');
+}
+
+function openAuthModal(tab) {
+  document.getElementById('authOverlay').classList.add('open');
+  switchAuthTab(tab || 'login');
+  clearAuthError();
+}
+function closeAuthModal() {
+  if (document.getElementById('authModalClose').classList.contains('locked')) return;
+  document.getElementById('authOverlay').classList.remove('open');
+}
+document.getElementById('authOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeAuthModal();
+});
+
+function switchAuthTab(tab) {
+  const isLogin = tab === 'login';
+  document.getElementById('tabLogin').classList.toggle('active', isLogin);
+  document.getElementById('tabRegister').classList.toggle('active', !isLogin);
+  document.getElementById('panelLogin').style.display = isLogin ? 'block' : 'none';
+  document.getElementById('panelRegister').style.display = !isLogin ? 'block' : 'none';
+  document.getElementById('panelToken').style.display = 'none';
+  document.getElementById('authTabs').style.display = 'flex';
+  clearAuthError();
+}
+
+/* ── ВХОД ── */
+async function doAuthLogin() {
+  clearAuthError();
+  const email = document.getElementById('loginEmail').value.trim();
+  const token = document.getElementById('loginToken').value.trim();
+  if (!email || !token) { showAuthError('Заполни все поля'); return; }
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true; btn.textContent = 'Входим...';
+  const { error } = await window.supabaseClient.auth.signInWithPassword({ email, password: token });
+  if (error) {
+    showAuthError('Неверный логин или токен. Проверь данные.');
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg> Войти';
+    return;
+  }
+  closeAuthModal();
+  await refreshNavAuth();
+  showFormsUnlocked();
+}
+document.getElementById('loginToken').addEventListener('keydown', e => { if (e.key === 'Enter') doAuthLogin(); });
+document.getElementById('loginEmail').addEventListener('keydown', e => { if (e.key === 'Enter') doAuthLogin(); });
+
+/* ── РЕГИСТРАЦИЯ ── */
+async function doAuthRegister() {
+  clearAuthError();
+  const email = document.getElementById('regEmail').value.trim();
+  const nick  = document.getElementById('regNick').value.trim();
+  if (!email || !nick) { showAuthError('Заполни логин и ник'); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showAuthError('Введи корректный e-mail'); return; }
+  if (nick.startsWith('@')) { showAuthError('Ник вводи без символа @'); return; }
+
+  const btn = document.getElementById('registerBtn');
+  btn.disabled = true; btn.textContent = 'Регистрируем...';
+
+  const token = generateToken();
+  _currentToken = token;
+
+  // Регистрация в Supabase Auth
+  const { data, error } = await window.supabaseClient.auth.signUp({
+    email,
+    password: token,
+    options: { data: { nickname: nick, messenger_type: _authMs } }
+  });
+
+  if (error) {
+    const msg = (error.message || '').toLowerCase();
+    showAuthError(
+      msg.includes('already registered') || msg.includes('already been registered')
+        ? 'Этот логин уже занят. Войди через вкладку «Вход».'
+        : ('Ошибка: ' + error.message)
+    );
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Зарегистрироваться';
+    return;
+  }
+
+  // Профиль создаётся автоматически на сервере (триггер on_auth_user_created
+  // в Supabase) сразу после регистрации в auth.users — это надёжнее, чем
+  // писать его отсюда, и работает даже если подтверждение email включено
+  // и сессии в браузере ещё нет.
+  //
+  // Здесь делаем upsert как "страховку" на случай, если сессия уже есть
+  // (когда подтверждение email отключено) — чтобы ник/мессенджер записались
+  // без задержки, не дожидаясь повторного запроса. Соответствует реальным
+  // колонкам таблицы profiles: id, login, email, nick, messenger, discord, telegram.
+  if (data.user && data.session) {
+    const profileData = {
+      id: data.user.id,
+      login: email,
+      email: email,
+      nick: nick,
+      messenger: _authMs,
+    };
+    if (_authMs === 'discord') profileData.discord = nick;
+    else profileData.telegram = nick;
+
+    const { error: profileError } = await window.supabaseClient.from('profiles').upsert(profileData);
+
+    if (profileError) {
+      console.error('Не удалось сохранить профиль в таблице profiles:', profileError);
+    }
+  }
+
+  // Токен — это и есть пароль аккаунта в Supabase Auth. Отдельно в базе
+  // он не хранится (и не должен — пароли в открытом виде хранить небезопасно).
+  // Если пользователь его потеряет — восстановить нельзя, только сброс пароля.
+  if (!data.session) {
+    console.warn('Регистрация прошла без активной сессии — скорее всего включено подтверждение email в Supabase Auth. Профиль создастся автоматически серверным триггером.');
+  }
+
+  showTokenScreen(token);
+}
+
+/* ── ТОКЕН ЭКРАН ── */
+function showTokenScreen(token) {
+  document.getElementById('panelRegister').style.display = 'none';
+  document.getElementById('panelLogin').style.display = 'none';
+  document.getElementById('authTabs').style.display = 'none';
+  document.getElementById('panelToken').style.display = 'block';
+  document.getElementById('authModalClose').classList.add('locked');
+  document.getElementById('tokenValueDisplay').textContent = token;
+
+  let secs = 5;
+  const secEl   = document.getElementById('tokenSec');
+  const closeBtn = document.getElementById('tokenCloseBtn');
+  const cdEl    = document.getElementById('tokenCountdown');
+  closeBtn.disabled = true; closeBtn.classList.remove('ready');
+
+  const timer = setInterval(() => {
+    secs--;
+    secEl.textContent = secs;
+    if (secs <= 0) {
+      clearInterval(timer);
+      closeBtn.disabled = false; closeBtn.classList.add('ready');
+      cdEl.textContent = 'Можешь закрыть окно';
+      document.getElementById('authModalClose').classList.remove('locked');
+    }
+  }, 1000);
+}
+
+function copyToken() {
+  const text = document.getElementById('tokenValueDisplay').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const box = document.getElementById('tokenValueDisplay');
+    const orig = box.textContent;
+    box.textContent = '✓ Скопировано';
+    setTimeout(() => { box.textContent = orig; }, 1300);
+  });
+}
+
+async function closeAfterToken() {
+  closeAuthModal();
+  // Сброс формы
+  document.getElementById('regEmail').value = '';
+  document.getElementById('regNick').value = '';
+  _authMs = 'discord'; _currentToken = '';
+  document.getElementById('ms-ds').classList.add('sel');
+  document.getElementById('ms-tg').classList.remove('sel');
+  await refreshNavAuth();
+  showFormsUnlocked();
+}
+
+/* ── НАВБАР ── */
+async function refreshNavAuth() {
+  const area = document.getElementById('nav-auth-area');
+  if (!area) return;
+  const { data } = await window.supabaseClient.auth.getSession();
+  const session = data.session;
+  if (!session) {
+    area.innerHTML = `<button class="nav-auth-btn" onclick="openAuthModal('login')">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+      Войти
+    </button>`;
+    return;
+  }
+
+  // Получаем профиль из таблицы чтобы показать NWID и ник
+  const { data: profile } = await window.supabaseClient
+    .from('profiles').select('nwid, nick, messenger').eq('id', session.user.id).maybeSingle();
+
+  const meta = session.user.user_metadata;
+  const nick = (profile && profile.nick) || meta.nickname || session.user.email;
+  const ms   = (profile && profile.messenger) || meta.messenger_type || 'discord';
+  const nwid = profile && profile.nwid ? `<span style="font-size:.72rem;opacity:.6;margin-left:4px;">#${profile.nwid}</span>` : '';
+
+  const icon = ms === 'telegram'
+    ? '<svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.96 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>'
+    : '<svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.099 18.08.11 18.102.128 18.116a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.027c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>';
+
+  area.innerHTML = `<div class="nav-user-row">
+    <div class="nav-auth-btn logged">${icon} ${nick}${nwid}</div>
+    <button class="nav-logout-btn" onclick="doLogout()">
+      <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+      Выйти
+    </button>
+  </div>`;
+}
+
+async function doLogout() {
+  await window.supabaseClient.auth.signOut();
+  await refreshNavAuth();
+  lockAllForms();
+}
+
+/* ── ЗАЩИТА ФОРМ ── */
+function injectAuthGates() {
+  document.querySelectorAll('.form-panel').forEach(panel => {
+    if (!panel.querySelector('.auth-gate')) {
+      const gate = document.createElement('div');
+      gate.className = 'auth-gate';
+      gate.innerHTML = `<h4>🔒 Требуется авторизация</h4>
+        <p>Чтобы подать заявку, нужно войти в аккаунт или зарегистрироваться.</p>
+        <button class="auth-gate-btn" onclick="openAuthModal('login')">
+          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+          Войти / Зарегистрироваться
+        </button>`;
+      panel.appendChild(gate);
+    }
+  });
+}
+
+function lockAllForms() {
+  document.querySelectorAll('.form-panel').forEach(panel => {
+    const card = panel.querySelector('.form-card');
+    const gate = panel.querySelector('.auth-gate');
+    if (card) card.style.display = 'none';
+    if (gate) gate.classList.add('show');
+  });
+}
+
+function showFormsUnlocked() {
+  document.querySelectorAll('.form-panel.open').forEach(panel => {
+    const card = panel.querySelector('.form-card');
+    const gate = panel.querySelector('.auth-gate');
+    if (card) card.style.display = 'block';
+    if (gate) gate.classList.remove('show');
+  });
+}
+
+const _origOpenForm = window.openForm;
+window.openForm = async function(section, key) {
+  const { data } = await window.supabaseClient.auth.getSession();
+  _origOpenForm(section, key);
+  const panel = document.getElementById(`form-${section}-${key}`);
+  if (!panel) return;
+  const card = panel.querySelector('.form-card');
+  const gate = panel.querySelector('.auth-gate');
+  if (!data.session) {
+    if (card) card.style.display = 'none';
+    if (gate) gate.classList.add('show');
+  } else {
+    if (card) card.style.display = 'block';
+    if (gate) gate.classList.remove('show');
+  }
+};
+
+const _origSubmitForm = window.submitForm;
+window.submitForm = async function(formId, licenseType) {
+  const { data } = await window.supabaseClient.auth.getSession();
+  if (!data.session) { openAuthModal('login'); return; }
+  _origSubmitForm(formId, licenseType);
+};
+
+/* ── ИНИЦИАЛИЗАЦИЯ ── */
+(async () => {
+  injectAuthGates();
+  await refreshNavAuth();
+  const { data } = await window.supabaseClient.auth.getSession();
+  if (!data.session) lockAllForms();
+
+  window.supabaseClient.auth.onAuthStateChange(async (event, session) => {
+    await refreshNavAuth();
+    if (!session) lockAllForms();
+  });
+})();
+</script>
+</body>
+</html>
